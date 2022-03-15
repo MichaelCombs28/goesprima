@@ -1,0 +1,7 @@
+exclude: "magefile.go"
+repos:
+  - repo: https://github.com/MichaelCombs28/pre-commit-golang
+    rev: master
+    hooks:
+      - id: golangci-lint
+      - id: go-unit-tests
