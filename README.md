@@ -14,26 +14,29 @@ go install github.com/MichaelCombs28/goesprima
 Currently goesprima only supports manual AST code generation.
 
 ```
+package main
+
 import (
-    "fmt"
-    "github.com/MichaelCombs28/goesprima"
+	"fmt"
+
+	esp "github.com/MichaelCombs28/goesprima"
 )
 
 func main() {
-    g := goesprima.NewGenerator()
-    g.AddStatements(
-        &ImportDeclaration{
-            Source: "@aws-amplify/core",
-            Specifiers: []ImportDeclarationSpecifier{
-                &ImportDefaultSpecifier{
-                    Local: &Identifier{
-                        Name: "Amplify",
-                    },
-                },
-            },
-        },
-    )
-    fmt.Println(g.String())
+	gen := esp.NewGenerator()
+	gen.AddStatements(
+		&esp.ImportDeclaration{
+			Source: "@aws-amplify/core",
+			Specifiers: []esp.ImportDeclarationSpecifier{
+				&esp.ImportDefaultSpecifier{
+					Local: &esp.Identifier{
+						Name: "Amplify",
+					},
+				},
+			},
+		},
+	)
+	fmt.Println(gen.String())
 }
 ```
 
