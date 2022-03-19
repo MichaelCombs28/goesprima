@@ -1168,7 +1168,7 @@ type EmptyStatement struct {
 }
 
 func (e *EmptyStatement) String() string {
-	return ";"
+	return ""
 }
 
 type ExpressionStatement struct {
