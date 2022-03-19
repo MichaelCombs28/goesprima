@@ -333,10 +333,7 @@ func (e *ExportNamedDeclaration) String() (s string) {
 	if e.Declaration != nil {
 		s += e.Declaration.String()
 	} else {
-		spec := make([]string, len(e.Specifiers))
-		for i, sp := range e.Specifiers {
-			spec[i] = sp.String()
-		}
+		spec := jsElementsToString(e.Specifiers)
 
 		s += "{ " + strings.Join(spec, ", ") + " }"
 	}
@@ -350,7 +347,7 @@ type ExportSpecifier struct {
 	*Node
 }
 
-func (e *ExportSpecifier) String() (s string) {
+func (e ExportSpecifier) String() (s string) {
 	s = e.Exported.String()
 	if e.Local != nil {
 		s += " as " + e.Local.String()
@@ -364,10 +361,7 @@ type BlockStatement struct {
 }
 
 func (b *BlockStatement) String() string {
-	r := make([]string, len(b.Items))
-	for n, e := range b.Items {
-		r[n] = e.String()
-	}
+	r := jsElementsToString(b.Items)
 	return strings.Join(r, "\n")
 }
 
@@ -377,15 +371,11 @@ type ArrayPattern struct {
 }
 
 func (a *ArrayPattern) String() (s string) {
-	elems := len(a.Elements)
-	if elems == 0 {
+	if len(a.Elements) == 0 {
 		return "[]"
 	}
 	s = "[\n"
-	r := make([]string, elems)
-	for n, e := range a.Elements {
-		r[n] = e.String()
-	}
+	r := jsElementsToString(a.Elements)
 	s += indentor.Indent(strings.Join(r, ", ")) + "\n]"
 	return
 }
@@ -401,10 +391,7 @@ func (o *ObjectPattern) String() (s string) {
 		return "{}"
 	}
 	s = "{\n"
-	props := make([]string, l)
-	for i, p := range o.Properties {
-		props[i] = indentor.Indent(p.String())
-	}
+	props := indentor.IndentArray(jsElementsToString(o.Properties))
 	s += strings.Join(props, ",\n") + ",\n}"
 	return
 }
@@ -472,15 +459,11 @@ type ArrayExpression struct {
 }
 
 func (a *ArrayExpression) String() (s string) {
-	elems := len(a.Elements)
-	if elems == 0 {
+	if len(a.Elements) == 0 {
 		return "[]"
 	}
 	s = "[\n"
-	r := make([]string, elems)
-	for n, e := range a.Elements {
-		r[n] = e.String()
-	}
+	r := jsElementsToString(a.Elements)
 	s += indentor.Indent(strings.Join(r, ", ")) + ",\n]"
 	return
 }
@@ -497,10 +480,7 @@ func (a *ArrowFunctionExpression) String() (s string) {
 		s = "async "
 	}
 
-	params := make([]string, len(a.Params))
-	for i, p := range a.Params {
-		params[i] = p.String()
-	}
+	params := jsElementsToString(a.Params)
 	s += "(" + strings.Join(params, ", ") + ") => {\n" + indentor.Indent((&a.Body).String()) + "\n}"
 	return
 }
@@ -726,10 +706,7 @@ type SequenceExpression struct {
 }
 
 func (s *SequenceExpression) String() string {
-	out := make([]string, len(s.Expressions))
-	for i, e := range s.Expressions {
-		out[i] = e.String()
-	}
+	out := jsElementsToString(s.Expressions)
 	return strings.Join(out, ", ")
 }
 
@@ -775,7 +752,7 @@ type SwitchCase struct {
 	Consequent BlockStatement
 }
 
-func (s *SwitchCase) String() string {
+func (s SwitchCase) String() string {
 	return "case " + s.Test.String() + ":\n" + indentor.Indent(s.Consequent.String())
 }
 
@@ -904,10 +881,7 @@ type ClassBody struct {
 }
 
 func (c *ClassBody) String() string {
-	props := make([]string, len(c.Properties))
-	for n, p := range c.Properties {
-		props[n] = p.String()
-	}
+	props := jsElementsToString(c.Properties)
 	return strings.Join(props, "\n")
 }
 
@@ -1084,10 +1058,7 @@ func (i *ImportDeclaration) String() (s string) {
 			case *ImportNamespaceSpecifier:
 				namespaceImport = v.String()
 			case *ImportSpecifier:
-				named := make([]string, len(v.NamedImports))
-				for n, ni := range v.NamedImports {
-					named[n] = ni.String()
-				}
+				named := jsElementsToString(v.NamedImports)
 				namedImports = append(namedImports, named...)
 			}
 		}
@@ -1304,10 +1275,7 @@ type SwitchStatement struct {
 }
 
 func (r *SwitchStatement) String() string {
-	cases := make([]string, len(r.Cases))
-	for i, c := range r.Cases {
-		cases[i] = c.String()
-	}
+	cases := jsElementsToString(r.Cases)
 	return "switch {\n" + indentor.Indent(strings.Join(cases, "\n")) + "\n}"
 }
 
@@ -1379,7 +1347,7 @@ type ImportSpecifier struct {
 	*Node
 }
 
-func (i *ImportSpecifier) String() (s string) {
+func (i ImportSpecifier) String() (s string) {
 	if len(i.NamedImports) == 0 {
 		return "{}"
 	}
@@ -1405,7 +1373,7 @@ type NamedImport struct {
 	*Node
 }
 
-func (n *NamedImport) String() (s string) {
+func (n NamedImport) String() (s string) {
 	s = n.Imported.Name
 	if n.Local != nil {
 		s += " as " + n.Local.Name
@@ -1740,19 +1708,13 @@ func (s *PropertyDefinition) classProperty() {}
 
 // Helpers
 func argListToString(args []ArgumentListElement) string {
-	out := make([]string, len(args))
-	for i, arg := range args {
-		out[i] = arg.String()
-	}
+	out := jsElementsToString(args)
 	return strings.Join(out, ", ")
 }
 
 func objectExpressionPropertiesToString(props []ObjectExpressionProperty) (s string) {
 	pl := len(props)
-	result := make([]string, pl)
-	for n, p := range props {
-		result[n] = p.String()
-	}
+	result := jsElementsToString(props)
 	s = strings.Join(result, ",\n")
 	if pl > 0 {
 		s += ","
@@ -1761,9 +1723,6 @@ func objectExpressionPropertiesToString(props []ObjectExpressionProperty) (s str
 }
 
 func functionParametersToString(params []FunctionParameter) string {
-	out := make([]string, len(params))
-	for i, arg := range params {
-		out[i] = arg.String()
-	}
+	out := jsElementsToString(params)
 	return strings.Join(out, ", ")
 }

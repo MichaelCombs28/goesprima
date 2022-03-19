@@ -69,10 +69,19 @@ func NumberLiteral(n interface{}) Literal {
 	}
 }
 
+func jsElementsToString[T JSElement](values []T) []string {
+	out := make([]string, len(values))
+	for i, v := range values {
+		out[i] = v.String()
+	}
+	return out
+}
+
 // Indentation
 
 type Indentor interface {
 	Indent(string) string
+	IndentArray([]string) []string
 }
 
 type Spaces struct {
@@ -80,12 +89,16 @@ type Spaces struct {
 }
 
 func (sp *Spaces) Indent(s string) string {
+	strs := sp.IndentArray(strings.Split(s, "\n"))
+	return strings.Join(strs, "\n")
+}
+
+func (sp *Spaces) IndentArray(strs []string) []string {
 	r := strings.Repeat(" ", sp.Spaces)
-	strs := strings.Split(s, "\n")
 	for i, str := range strs {
 		strs[i] = r + str
 	}
-	return strings.Join(strs, "\n")
+	return strs
 }
 
 type Tabs struct {
@@ -93,10 +106,14 @@ type Tabs struct {
 }
 
 func (t *Tabs) Indent(s string) string {
+	strs := t.IndentArray(strings.Split(s, "\n"))
+	return strings.Join(strs, "\n")
+}
+
+func (t *Tabs) IndentArray(strs []string) []string {
 	r := strings.Repeat("\t", t.Tabs)
-	strs := strings.Split(s, "\n")
 	for i, str := range strs {
 		strs[i] = r + str
 	}
-	return strings.Join(strs, "\n")
+	return strs
 }
